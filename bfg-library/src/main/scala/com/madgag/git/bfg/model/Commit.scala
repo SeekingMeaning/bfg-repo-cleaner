@@ -62,7 +62,17 @@ case class CommitArcs(parents: Seq[ObjectId], tree: ObjectId) {
   def isEmptyCommit(implicit revWalk: RevWalk) = parents match {
     case Seq() => tree == Tree.Empty.objectId
     case Seq(singleParent) => singleParent.asRevCommit.getTree == tree
-    case _ => false
+    case Seq(firstParent, secondParent) => firstParent.asRevCommit.getTree == tree || secondParent.asRevCommit.getTree == tree
+    case _ => {
+      var empty = false
+      for (parent <- parents) {
+        if (parent.asRevCommit.getTree == tree) {
+          empty = true
+          // FIXME: break loop (I don't know Scala)
+        }
+      }
+      empty
+    }
   }
 
 }
